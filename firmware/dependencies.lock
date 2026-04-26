@@ -22,11 +22,11 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 6.0.0
+    version: 5.5.1
 direct_dependencies:
 - espressif/mdns
 - espressif/mqtt
 - idf
 manifest_hash: 1cc16efcb431810d9616dc17a345f0c358d02383cb1d90ff207a05c3e2a755a9
 target: esp32
-version: 3.0.0
+version: 2.0.0

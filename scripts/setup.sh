@@ -9,21 +9,21 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-    exit 1
+  echo -e "${RED}[ERROR]${NC} $1"
+  exit 1
 }
 
 if command -v pacman &>/dev/null; then
-    PM="pacman"
-    INSTALL="sudo pacman -S --noconfirm"
+  PM="pacman"
+  INSTALL="sudo pacman -S --noconfirm"
 elif command -v apt &>/dev/null; then
-    PM="apt"
-    INSTALL="sudo apt install -y"
+  PM="apt"
+  INSTALL="sudo apt install -y"
 elif command -v dnf &>/dev/null; then
-    PM="dnf"
-    INSTALL="sudo dnf install -y"
+  PM="dnf"
+  INSTALL="sudo dnf install -y"
 else
-    error "Unsupported distro. Install dependencies manually."
+  error "Unsupported distro. Install dependencies manually."
 fi
 info "Detected package manager: $PM"
 
@@ -38,36 +38,36 @@ info "Detected shell: $SHELL_NAME (config: $RC)"
 
 info "Installing make, mosquitto, avahi..."
 if [ "$PM" = "pacman" ]; then
-    $INSTALL make mosquitto avahi
+  $INSTALL make mosquitto avahi
 elif [ "$PM" = "apt" ]; then
-    sudo apt update
-    $INSTALL make mosquitto avahi-daemon
+  sudo apt update
+  $INSTALL make mosquitto avahi-daemon
 elif [ "$PM" = "dnf" ]; then
-    $INSTALL make mosquitto avahi
+  $INSTALL make mosquitto avahi
 fi
 
 # Go
 if command -v go &>/dev/null; then
-    info "Go already installed: $(go version)"
+  info "Go already installed: $(go version)"
 else
-    info "Installing Go..."
-    if [ "$PM" = "pacman" ]; then
-        $INSTALL go
-    elif [ "$PM" = "apt" ]; then
-        $INSTALL golang-go
-    elif [ "$PM" = "dnf" ]; then
-        $INSTALL golang
-    fi
+  info "Installing Go..."
+  if [ "$PM" = "pacman" ]; then
+    $INSTALL go
+  elif [ "$PM" = "apt" ]; then
+    $INSTALL golang-go
+  elif [ "$PM" = "dnf" ]; then
+    $INSTALL golang
+  fi
 fi
 
 # Bun
 if command -v bun &>/dev/null; then
-    info "Bun already installed: $(bun --version)"
+  info "Bun already installed: $(bun --version)"
 else
-    info "Installing Bun..."
-    curl -fsSL https://bun.sh/install | bash
-    export BUN_INSTALL="$HOME/.bun"
-    export PATH="$BUN_INSTALL/bin:$PATH"
+  info "Installing Bun..."
+  curl -fsSL https://bun.sh/install | bash
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
 info "Configuring Mosquitto..."
@@ -93,22 +93,22 @@ info "Starting services..."
 sudo systemctl enable --now mosquitto
 sudo systemctl enable --now avahi-daemon
 
-IDF_PATH="/opt/esp-idf/export.sh"
+IDF_PATH="$HOME/.espressif/tools/activate_idf_v5.5.1.sh"
 ALIAS_LINE=""
 
 if [ "$SHELL_NAME" = "fish" ]; then
-    ALIAS_LINE="alias idf='source $IDF_PATH'"
+  ALIAS_LINE="alias idf='source $IDF_PATH'"
 else
-    ALIAS_LINE="alias idf='source $IDF_PATH'"
+  ALIAS_LINE="alias idf='source $IDF_PATH'"
 fi
 
 if grep -q "alias idf=" "$RC" 2>/dev/null; then
-    info "idf alias already exists in $RC"
+  info "idf alias already exists in $RC"
 else
-    echo "" >>"$RC"
-    echo "# ESP-IDF" >>"$RC"
-    echo "$ALIAS_LINE" >>"$RC"
-    info "Added idf alias to $RC"
+  echo "" >>"$RC"
+  echo "# ESP-IDF" >>"$RC"
+  echo "$ALIAS_LINE" >>"$RC"
+  info "Added idf alias to $RC"
 fi
 
 echo ""
