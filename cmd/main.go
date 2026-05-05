@@ -7,11 +7,19 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/joho/godotenv"
+	"github.com/versenilvis/templog-monitoring/internal/db"
 	"github.com/versenilvis/templog-monitoring/internal/hub"
 	"github.com/versenilvis/templog-monitoring/internal/sensor"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("[INFO] No .env file found or error reading it, using environment variables")
+	}
+
+	db.Init()
+
 	h := hub.New(60)
 
 	// usb port version
