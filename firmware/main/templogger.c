@@ -221,11 +221,9 @@ void sensor_display_task(void *pvParameters) {
         // Tạo chuỗi JSON: {"temp": 32.50, "hum": 65.00}
         sprintf(json_payload, "{\"temp\": %.2f, \"hum\": %.2f}", temp, hum);
 
-        // Publish lên Topic đồ án CE103, QoS level 1 (đảm bảo tới nơi ít nhất 1
-        // lần)
-        esp_mqtt_client_publish(mqtt_client,
-                                "uit/ce103/project/nhietdovadoamphong",
-                                json_payload, 0, 1, 0);
+            esp_mqtt_client_publish(mqtt_client,
+                                    "room/sensor/data",
+                                    json_payload, 0, 1, 0);
       }
 
       // In log ra Terminal máy tính để debug
