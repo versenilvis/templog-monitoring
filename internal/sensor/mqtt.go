@@ -6,6 +6,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/versenilvis/templog-monitoring/internal/db"
 	"github.com/versenilvis/templog-monitoring/internal/hub"
 )
 
@@ -45,6 +46,9 @@ func ReadMQTT(h *hub.Hub) {
 		}
 
 		log.Printf("[MQTT] Received: Temp=%.2f, Hum=%.2f", payload.Temp, payload.Hum)
+
+		go db.WriteSensorData(payload.Temp, payload.Hum)
+		go db.ProcessAlert(payload.Temp)
 
 		h.Broadcast(hub.SensorData{
 			Temperature: payload.Temp,
