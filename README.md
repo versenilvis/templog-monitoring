@@ -18,6 +18,7 @@ The Go server connects to the same cloud broker, parses the JSON payload, and br
 ## Dependencies
 - [Bun](https://bun.com/)
 - [Golang](https://go.dev/)
+- [Docker](https://www.docker.com/)
 - [Make](https://www.gnu.org/software/make/) (for Makefile)
 - [EIM](https://docs.espressif.com/projects/idf-im-ui/en/latest/)
 - [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/v3.1.5/get-started/linux-setup.html)
@@ -100,6 +101,18 @@ Expected:
 + wlp1s0 IPv4 MQTT Broker _mqtt._tcp local
 ```
 -->
+## Configuration
+Look at the `.env.example` file, create `.env` file with your own credentials
+1. With email, I recommend you to use gmail app passwords
+   - Go to: `https://myaccount.google.com/apppasswords`
+   - Name your application
+   - Copy generated password and paste it to `SMTP_PASSWORD` in `.env` file
+2. With the database, `INFLUX_TOKEN` and `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` are the same
+   - Therefore, simply run this command to generate token and paste in both: 
+```bash
+openssl rand -hex 32
+```
+
 ## How to run
 - First, build the firmware
 ```bash
@@ -114,10 +127,12 @@ make flash
 make monitor
 ```
 ## Monitoring via the web
-- To run both web and server
+- Run the InfluxDB database docker container and run both web and server in one single command
 ```bash
 make app
 ```
+
+*Don't forget to use `make down` to turn off DB when you turn off all services, because when we kill web/server, the InfluxDB docker container is still running in the background.*
 
 <div align="center">
   
