@@ -18,7 +18,7 @@ The Go server connects to the same cloud broker, parses the JSON payload, and br
 ## Dependencies
 - [Bun](https://bun.com/)
 - [Golang](https://go.dev/)
-- [Docker](https://www.docker.com/)
+- [Docker](https://www.docker.com/) (please also read [Docker Compose](https://docs.docker.com/compose/))
 - [Make](https://www.gnu.org/software/make/) (for Makefile)
 - [EIM](https://docs.espressif.com/projects/idf-im-ui/en/latest/)
 - [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/v3.1.5/get-started/linux-setup.html)
