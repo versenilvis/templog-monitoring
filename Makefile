@@ -18,7 +18,7 @@ web:
 app:
 	@docker compose up -d && make server & cd web && bun run dev
 
-downn:
+down:
 	@docker compose down
 
 pkg:
