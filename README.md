@@ -6,6 +6,11 @@
   <img src="https://camo.githubusercontent.com/b16ecdcac9c3d21ec3a49459430f747b46b3a37acc95ee468d87d0ec61ff2392/68747470733a2f2f692e696d6775722e636f6d2f576d4d6e5352742e706e67">
 </div>
 
+<table>
+  <td ><img src="https://github.com/user-attachments/assets/6152bb4c-d080-41de-b429-b473144db4cb"></td>
+  <td ><img src="https://github.com/user-attachments/assets/13049b8e-dad2-4678-9451-a29d186a01df"></td>
+</table>
+
 >[!IMPORTANT]
 > This branch uses WiFi and MQTT. ESP32 has built-in WiFi, no extra hardware needed  
 > Switch to the [`firmware-usb`](https://github.com/versenilvis/templog-monitoring/tree/firmware-usb) branch if you prefer the USB/UART version
@@ -136,4 +141,23 @@ make app
 
 <div align="center">
   
+</div>
+
+## PCB Etching showcase
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><img src="https://github.com/user-attachments/assets/ec5406e6-78d8-4c76-b587-d04c93455509" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/7a390c2c-73d5-4a92-8c15-f42b83440af6" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/19734409-0c37-4f56-961e-d80f7ac1615d" width="250"/></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <td align="center"><img src="https://github.com/user-attachments/assets/db1ec918-5fc8-4e9f-81db-563997aa6dea" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/1ce565ee-52be-4e09-9335-24c67c76543d" width="250"/></td>
+    </tr>
+  </table>
 </div>
