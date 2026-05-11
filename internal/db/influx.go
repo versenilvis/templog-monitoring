@@ -48,11 +48,14 @@ func ProcessAlert(temp float64) {
 		return
 	}
 
-	// 1. Critical level (38°C) - ALWAYS immediate
+	// 1. Critical level (38°C) - 2min Cooldown
 	if temp >= 38.0 {
-		log.Println("[ALERT] CRITICAL threshold of 38°C breached! Sending email immediately.")
-		alert.SendEmailAlert(temp, "critical")
-		writeAlertEvent(temp, "critical")
+		shouldSend, _ := checkAlertCooldown("critical", 2)
+		if shouldSend {
+			log.Println("[ALERT] CRITICAL threshold of 38°C breached! Sending email.")
+			alert.SendEmailAlert(temp, "critical")
+			writeAlertEvent(temp, "critical")
+		}
 		return
 	}
 
@@ -67,23 +70,21 @@ func ProcessAlert(temp float64) {
 
 	// 3. Warning level (35°C) - Hybrid: Reset OR 30min Cooldown
 	if temp >= 35.0 {
-		shouldSend, reason := checkWarningCooldown()
+		shouldSend, reason := checkAlertCooldown("warning", 30)
 		if shouldSend {
 			log.Printf("[ALERT] WARNING threshold of 35°C breached! (%s). Sending email.\n", reason)
 			alert.SendEmailAlert(temp, "warning")
 			writeAlertEvent(temp, "warning")
-		} else {
-			log.Println("[ALERT] Temperature >= 35°C but currently suppressed by 30min cooldown.")
 		}
 	}
 }
 
-func checkWarningCooldown() (bool, string) {
+func checkAlertCooldown(level string, cooldownMinutes int) (bool, string) {
 	org := os.Getenv("INFLUX_ORG")
 	bucket := os.Getenv("INFLUX_BUCKET")
 	queryAPI := client.QueryAPI(org)
 
-	// Get the last event across all alert types
+	// Get the last event across all alert types to check the sequence
 	query := fmt.Sprintf(`
 		from(bucket:"%s")
 			|> range(start: -24h)
@@ -98,15 +99,21 @@ func checkWarningCooldown() (bool, string) {
 	}
 
 	if result.Next() {
-		level := result.Record().ValueByKey("level").(string)
+		lastLevel := result.Record().ValueByKey("level").(string)
 		lastTime := result.Record().Time()
 
-		if level == "reset" {
+		// If the system was reset, we always send the next warning/critical
+		if lastLevel == "reset" {
 			return true, "system was reset"
 		}
 
-		// If last was an alert, check if 30 minutes passed
-		if time.Since(lastTime) > 30*time.Minute {
+		// If we are checking for a different (higher) level than the last alert, send immediately
+		if level == "critical" && lastLevel == "warning" {
+			return true, "escalated to critical"
+		}
+
+		// If it's the same level or lower, check the cooldown
+		if time.Since(lastTime) > time.Duration(cooldownMinutes)*time.Minute {
 			return true, "cooldown expired"
 		}
 
