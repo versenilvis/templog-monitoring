@@ -163,6 +163,21 @@ make app
     </tr>
   </table>
 </div>
+
+## Acknowledgement
+
+Thanks to all member that contribute to this project.
+
+- 24520598 - Mai Thế Hùng
+- 24520560 - Nguyễn Trọng Hoàng
+- 24520537 - Lã Minh Hoàng 
+- 24520563 - Phạm Việt Hoàng
+- 24520570 - Trần Nguyễn Huy Hoàng
+- 24521016 - Trần Nguyễn Hoàng Long
+
+## License
+
+This project is licensed under the [0BSD License](LICENSE). Meaning you can do whatever you want with it.
 <!--
 ## How to quickly view your data in InfluxDB
 - Open `localhost:8086`
