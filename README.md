@@ -20,6 +20,8 @@ The ESP32 boots and connects to WiFi. If no credentials are found, it enters **S
 
 The Go server connects to the same cloud broker, parses the JSON payload, and broadcasts it via WebSocket.
 
+So, what's the key feature about this product? Like I said, because it's cloud-based, location doesn't matter. As long as you set it up right, your server and firmware can be anywhere in the world, as long as they have Wi-Fi to talk to the cloud.
+
 ## Dependencies
 - [Bun](https://bun.com/)
 - [Golang](https://go.dev/)
