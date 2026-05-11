@@ -29,16 +29,16 @@ func ReadMQTT(h *hub.Hub) {
 
 	opts.OnConnect = func(c mqtt.Client) {
 		log.Println("[MQTT] Connected to EMQX Cloud Broker")
-		log.Println("[MQTT] Subscribing to topic: room/sensor/data")
+		log.Println("[MQTT] Subscribing to topic: uit/ce103/project/nhietdovadoamphong")
 
-		if token := c.Subscribe("room/sensor/data", 1, nil); token.Wait() && token.Error() != nil {
+		if token := c.Subscribe("uit/ce103/project/nhietdovadoamphong", 1, nil); token.Wait() && token.Error() != nil {
 			log.Printf("[MQTT] Subscribe error: %v", token.Error())
 		}
 	}
 
 	client := mqtt.NewClient(opts)
 
-	client.AddRoute("room/sensor/data", func(c mqtt.Client, m mqtt.Message) {
+	client.AddRoute("uit/ce103/project/nhietdovadoamphong", func(c mqtt.Client, m mqtt.Message) {
 		var payload MQTTPayload
 		if err := json.Unmarshal(m.Payload(), &payload); err != nil {
 			log.Printf("[MQTT] Payload parse error: %v | Raw: %s", err, string(m.Payload()))
