@@ -6,18 +6,24 @@
   <img src="https://camo.githubusercontent.com/b16ecdcac9c3d21ec3a49459430f747b46b3a37acc95ee468d87d0ec61ff2392/68747470733a2f2f692e696d6775722e636f6d2f576d4d6e5352742e706e67">
 </div>
 
+<table>
+  <td ><img src="https://github.com/user-attachments/assets/6152bb4c-d080-41de-b429-b473144db4cb"></td>
+  <td ><img src="https://github.com/user-attachments/assets/13049b8e-dad2-4678-9451-a29d186a01df"></td>
+</table>
+
 >[!IMPORTANT]
 > This branch uses WiFi and MQTT. ESP32 has built-in WiFi, no extra hardware needed  
 > Switch to the [`firmware-usb`](https://github.com/versenilvis/templog-monitoring/tree/firmware-usb) branch if you prefer the USB/UART version
 
 ## Under the hood
-The ESP32 boots and connects to WiFi. It then uses mDNS to discover any `_mqtt._tcp` service on the local network, so no hardcoded hostname is needed. Once it finds the broker, it connects and publishes `{"temp": xx.xx, "hum": xx.xx}` to the topic room/sensor/data every 2 seconds
+The ESP32 boots and connects to WiFi. If no credentials are found, it enters **SmartConfig** mode (use ESPTouch v2 app to provision). Once connected, it connects to the **EMQX Cloud Broker** and publishes `{"temp": xx.xx, "hum": xx.xx}` to the topic every 2 seconds.
 
-The Go server subscribes to that topic, parses the JSON payload, and broadcasts the data over WebSocket to the frontend
+The Go server connects to the same cloud broker, parses the JSON payload, and broadcasts it via WebSocket.
 
 ## Dependencies
 - [Bun](https://bun.com/)
 - [Golang](https://go.dev/)
+- [Docker](https://www.docker.com/) (please also read [Docker Compose](https://docs.docker.com/compose/))
 - [Make](https://www.gnu.org/software/make/) (for Makefile)
 - [EIM](https://docs.espressif.com/projects/idf-im-ui/en/latest/)
 - [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/v3.1.5/get-started/linux-setup.html)
@@ -100,6 +106,18 @@ Expected:
 + wlp1s0 IPv4 MQTT Broker _mqtt._tcp local
 ```
 -->
+## Configuration
+Look at the `.env.example` file, create `.env` file with your own credentials
+1. With email, I recommend you to use gmail app passwords
+   - Go to: `https://myaccount.google.com/apppasswords`
+   - Name your application
+   - Copy generated password and paste it to `SMTP_PASSWORD` in `.env` file
+2. With the database, `INFLUX_TOKEN` and `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` are the same
+   - Therefore, simply run this command to generate token and paste in both: 
+```bash
+openssl rand -hex 32
+```
+
 ## How to run
 - First, build the firmware
 ```bash
@@ -114,11 +132,32 @@ make flash
 make monitor
 ```
 ## Monitoring via the web
-- To run both web and server
+- Run the InfluxDB database docker container and run both web and server in one single command
 ```bash
 make app
 ```
 
+*Don't forget to use `make down` to turn off DB when you turn off all services, because when we kill web/server, the InfluxDB docker container is still running in the background.*
+
 <div align="center">
   
+</div>
+
+## PCB Etching showcase
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><img src="https://github.com/user-attachments/assets/ec5406e6-78d8-4c76-b587-d04c93455509" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/7a390c2c-73d5-4a92-8c15-f42b83440af6" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/19734409-0c37-4f56-961e-d80f7ac1615d" width="250"/></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <td align="center"><img src="https://github.com/user-attachments/assets/db1ec918-5fc8-4e9f-81db-563997aa6dea" width="250"/></td>
+      <td align="center"><img src="https://github.com/user-attachments/assets/1ce565ee-52be-4e09-9335-24c67c76543d" width="250"/></td>
+    </tr>
+  </table>
 </div>

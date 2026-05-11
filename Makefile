@@ -1,4 +1,4 @@
-.PHONY: build flash server dev pkg web app setup monitor
+.PHONY: build flash server dev pkg web app setup monitor down
 
 build:
 	@cd firmware/ && idf.py build
@@ -16,8 +16,10 @@ web:
 	@cd web && bun run dev
 
 app:
-	@make server & cd web && bun run dev
+	@docker compose up -d && make server & cd web && bun run dev
 
+down:
+	@docker compose down
 
 pkg:
 	@go mod tidy
