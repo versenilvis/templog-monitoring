@@ -6,10 +6,18 @@ export type SensorData = {
   timestamp: string
 }
 
+export type DailyStats = {
+  min_temp: number
+  max_temp: number
+  min_hum: number
+  max_hum: number
+}
+
 type WsState = {
   connected: boolean
   latest: SensorData | null
   history: SensorData[]
+  stats: DailyStats
 }
 
 const MAX_HISTORY = 60 // 60 seconds of data on chart
@@ -19,10 +27,26 @@ function createWsStore() {
     connected: false,
     latest: null,
     history: [],
+    stats: {
+      min_temp: 0,
+      max_temp: 0,
+      min_hum: 0,
+      max_hum: 0
+    }
   })
 
   let socket: WebSocket | null = null
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+
+  async function fetchStats() {
+    try {
+      const res = await fetch('http://localhost:8080/api/stats')
+      const data = await res.json()
+      state.stats = data
+    } catch (e) {
+      console.error('Failed to fetch stats', e)
+    }
+  }
 
   function connect() {
     if (!browser) return
@@ -31,6 +55,7 @@ function createWsStore() {
 
     socket.onopen = () => {
       state.connected = true
+      fetchStats()
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)
         reconnectTimer = null
@@ -48,6 +73,12 @@ function createWsStore() {
         const data: SensorData = msg.data
         state.latest = data
         state.history = [...state.history.slice(-(MAX_HISTORY - 1)), data]
+
+        // Update real-time stats
+        if (state.stats.min_temp === 0 || data.temperature < state.stats.min_temp) state.stats.min_temp = data.temperature
+        if (data.temperature > state.stats.max_temp) state.stats.max_temp = data.temperature
+        if (state.stats.min_hum === 0 || data.humidity < state.stats.min_hum) state.stats.min_hum = data.humidity
+        if (data.humidity > state.stats.max_hum) state.stats.max_hum = data.humidity
       }
     }
 
@@ -68,6 +99,7 @@ function createWsStore() {
     get connected() { return state.connected },
     get latest() { return state.latest },
     get history() { return state.history },
+    get stats() { return state.stats },
   }
 }
 

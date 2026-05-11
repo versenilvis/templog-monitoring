@@ -59,5 +59,13 @@ func main() {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
 
+	app.Get("/api/stats", func(c fiber.Ctx) error {
+		stats, err := db.GetTodayStats()
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.JSON(stats)
+	})
+
 	log.Fatal(app.Listen(":8080"))
 }

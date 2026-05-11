@@ -57,13 +57,13 @@ func ProcessAlert(temp float64) {
 	}
 
 	// Warning level
-	if temp >= 32.0 {
+	if temp >= 26.0 {
 		if shouldSendWarningAlert() {
-			log.Println("[ALERT] WARNING threshold of 32°C breached! Sending email.")
+			log.Println("[ALERT] WARNING threshold of 26°C breached! Sending email.")
 			alert.SendEmailAlert(temp, "warning")
 			writeAlertEvent(temp, "warning")
 		} else {
-			log.Println("[ALERT] Temperature >= 32°C detected but currently in cooldown (30 minutes). Skipping email.")
+			log.Println("[ALERT] Temperature >= 26°C detected but currently in cooldown (30 minutes). Skipping email.")
 		}
 	}
 }
@@ -115,4 +115,85 @@ func writeAlertEvent(temp float64, level string) {
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		log.Printf("[INFLUX] Error writing alert event: %v\n", err)
 	}
+}
+
+type DailyStats struct {
+	MinTemp float64 `json:"min_temp"`
+	MaxTemp float64 `json:"max_temp"`
+	MinHum  float64 `json:"min_hum"`
+	MaxHum  float64 `json:"max_hum"`
+}
+
+func GetTodayStats() (DailyStats, error) {
+	// Initialize with extreme values to ensure correct min/max calculation
+	stats := DailyStats{
+		MinTemp: 99.0,
+		MaxTemp: -99.0,
+		MinHum:  100.0,
+		MaxHum:  0.0,
+	}
+
+	if client == nil {
+		return stats, fmt.Errorf("influxdb client not initialized")
+	}
+
+	org := os.Getenv("INFLUX_ORG")
+	bucket := os.Getenv("INFLUX_BUCKET")
+	queryAPI := client.QueryAPI(org)
+
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	startStr := startOfDay.Format(time.RFC3339)
+
+	query := fmt.Sprintf(`
+		data = from(bucket:"%s")
+			|> range(start: %s)
+			|> filter(fn: (r) => r._measurement == "sensor")
+			|> filter(fn: (r) => r._field == "temperature" or r._field == "humidity")
+
+		data |> group(columns: ["_field"]) |> min() |> yield(name: "min")
+		data |> group(columns: ["_field"]) |> max() |> yield(name: "max")
+	`, bucket, startStr)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return stats, err
+	}
+
+	hasData := false
+	for result.Next() {
+		hasData = true
+		field := result.Record().Field()
+		value, ok := result.Record().Value().(float64)
+		if !ok {
+			continue
+		}
+
+		// Use result name from the record to distinguish min/max yields
+		op := result.Record().Result()
+
+		switch op {
+		case "min":
+			switch field {
+			case "temperature":
+				stats.MinTemp = value
+			case "humidity":
+				stats.MinHum = value
+			}
+		case "max":
+			switch field {
+			case "temperature":
+				stats.MaxTemp = value
+			case "humidity":
+				stats.MaxHum = value
+			}
+		}
+	}
+
+	// If no data found, reset to 0
+	if !hasData {
+		return DailyStats{}, nil
+	}
+
+	return stats, result.Err()
 }

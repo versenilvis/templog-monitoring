@@ -19,6 +19,9 @@ func SendEmailAlert(temp float64, level string) {
 	}
 
 	to := strings.Split(toRaw, ",")
+	for i := range to {
+		to[i] = strings.TrimSpace(to[i])
+	}
 
 	var subject string
 	if level == "critical" {

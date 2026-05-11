@@ -11,6 +11,13 @@
               })
             : "--:--:--",
     );
+
+    const todayDate = new Date().toLocaleDateString("vi-VN", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 </script>
 
 <main>
@@ -32,9 +39,12 @@
             <span>TempLog</span>
         </div>
 
-        <div class="status" class:online={ws.connected}>
-            <span class="dot"></span>
-            {ws.connected ? "Live" : "Connecting..."}
+        <div class="status-group">
+            <div class="date-label">{todayDate}</div>
+            <div class="status" class:online={ws.connected}>
+                <span class="dot"></span>
+                {ws.connected ? "Live" : "Connecting..."}
+            </div>
         </div>
     </header>
 
@@ -54,12 +64,14 @@
                 {temp !== null ? temp.toFixed(2) : "---"}
                 <span class="unit">°C</span>
             </div>
-            <div class="stat-bar">
-                <div
-                    class="stat-bar-fill temp-fill"
-                    style="width: {temp !== null
-                        ? Math.min((temp / 50) * 100, 100)
-                        : 0}%">
+            <div class="stat-range">
+                <div class="range-item">
+                    <span class="range-label">MIN</span>
+                    <span class="range-val">{ws.stats.min_temp.toFixed(1)}°</span>
+                </div>
+                <div class="range-item">
+                    <span class="range-label">MAX</span>
+                    <span class="range-val">{ws.stats.max_temp.toFixed(1)}°</span>
                 </div>
             </div>
         </div>
@@ -80,10 +92,14 @@
                 {hum !== null ? hum.toFixed(2) : "---"}
                 <span class="unit">%</span>
             </div>
-            <div class="stat-bar">
-                <div
-                    class="stat-bar-fill hum-fill"
-                    style="width: {hum !== null ? Math.min(hum, 100) : 0}%">
+            <div class="stat-range">
+                <div class="range-item">
+                    <span class="range-label">MIN</span>
+                    <span class="range-val">{ws.stats.min_hum.toFixed(1)}%</span>
+                </div>
+                <div class="range-item">
+                    <span class="range-label">MAX</span>
+                    <span class="range-val">{ws.stats.max_hum.toFixed(1)}%</span>
                 </div>
             </div>
         </div>
@@ -157,6 +173,18 @@
         font-weight: 600;
         letter-spacing: -0.02em;
         color: var(--text-primary);
+    }
+
+    .status-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .date-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
     }
 
     .status {
@@ -266,25 +294,30 @@
         margin-left: 2px;
     }
 
-    .stat-bar {
-        height: 4px;
-        background: var(--bg-elevated);
-        border-radius: 2px;
-        overflow: hidden;
-        margin-top: 4px;
+    .stat-range {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 4px;
     }
 
-    .stat-bar-fill {
-        height: 100%;
-        border-radius: 2px;
-        transition: width 0.6s ease;
+    .range-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
     }
 
-    .temp-fill {
-        background: linear-gradient(to right, #c2410c, #f97316);
+    .range-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.05em;
     }
-    .hum-fill {
-        background: linear-gradient(to right, #0284c7, #38bdf8);
+
+    .range-val {
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: var(--font-mono);
+        color: var(--text-primary);
     }
 
     .stat-ts {
