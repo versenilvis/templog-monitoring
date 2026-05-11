@@ -48,7 +48,7 @@ func ProcessAlert(temp float64) {
 		return
 	}
 
-	// Critical level
+	// 1. Critical level (38°C) - ALWAYS immediate
 	if temp >= 38.0 {
 		log.Println("[ALERT] CRITICAL threshold of 38°C breached! Sending email immediately.")
 		alert.SendEmailAlert(temp, "critical")
@@ -56,50 +56,89 @@ func ProcessAlert(temp float64) {
 		return
 	}
 
-	// Warning level
-	if temp >= 26.0 {
-		if shouldSendWarningAlert() {
-			log.Println("[ALERT] WARNING threshold of 26°C breached! Sending email.")
+	// 2. Reset condition (Temp < 30) - Clears the need for cooldown
+	if temp < 30.0 {
+		if isLastEventAlert() {
+			log.Println("[ALERT] Temperature cooled down below 30°C. Alert system reset and re-armed.")
+			writeAlertEvent(temp, "reset")
+		}
+		return
+	}
+
+	// 3. Warning level (35°C) - Hybrid: Reset OR 30min Cooldown
+	if temp >= 35.0 {
+		shouldSend, reason := checkWarningCooldown()
+		if shouldSend {
+			log.Printf("[ALERT] WARNING threshold of 35°C breached! (%s). Sending email.\n", reason)
 			alert.SendEmailAlert(temp, "warning")
 			writeAlertEvent(temp, "warning")
 		} else {
-			log.Println("[ALERT] Temperature >= 26°C detected but currently in cooldown (30 minutes). Skipping email.")
+			log.Println("[ALERT] Temperature >= 35°C but currently suppressed by 30min cooldown.")
 		}
 	}
 }
 
-func shouldSendWarningAlert() bool {
+func checkWarningCooldown() (bool, string) {
 	org := os.Getenv("INFLUX_ORG")
 	bucket := os.Getenv("INFLUX_BUCKET")
 	queryAPI := client.QueryAPI(org)
 
-	// Flux query to check for warning alerts in the last 30 minutes
+	// Get the last event across all alert types
 	query := fmt.Sprintf(`
 		from(bucket:"%s")
-			|> range(start: -30m)
+			|> range(start: -24h)
 			|> filter(fn: (r) => r._measurement == "alert")
-			|> filter(fn: (r) => r.level == "warning")
-			|> count()
+			|> group()
+			|> last()
 	`, bucket)
 
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
-		log.Printf("[INFLUX] Error querying alerts: %v\n", err)
-		return true // Fallback to send alert if query fails
+		return true, "query error"
 	}
 
-	for result.Next() {
-		val := result.Record().Value()
-		if count, ok := val.(int64); ok && count > 0 {
-			return false
+	if result.Next() {
+		level := result.Record().ValueByKey("level").(string)
+		lastTime := result.Record().Time()
+
+		if level == "reset" {
+			return true, "system was reset"
 		}
+
+		// If last was an alert, check if 30 minutes passed
+		if time.Since(lastTime) > 30*time.Minute {
+			return true, "cooldown expired"
+		}
+
+		return false, ""
 	}
 
-	if result.Err() != nil {
-		log.Printf("[INFLUX] Query parsing error: %v\n", result.Err())
+	return true, "no previous data"
+}
+
+func isLastEventAlert() bool {
+	org := os.Getenv("INFLUX_ORG")
+	bucket := os.Getenv("INFLUX_BUCKET")
+	queryAPI := client.QueryAPI(org)
+
+	query := fmt.Sprintf(`
+		from(bucket:"%s")
+			|> range(start: -24h)
+			|> filter(fn: (r) => r._measurement == "alert")
+			|> group()
+			|> last()
+	`, bucket)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return false
 	}
 
-	return true
+	if result.Next() {
+		level := result.Record().ValueByKey("level").(string)
+		return level == "warning" || level == "critical"
+	}
+	return false
 }
 
 func writeAlertEvent(temp float64, level string) {
