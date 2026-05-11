@@ -161,3 +161,14 @@ make app
     </tr>
   </table>
 </div>
+
+## How to quickly view your data in InfluxDB
+- Open `localhost:8086`
+- Sign in with your username and password from `.env`
+- Open Data Explorer tab
+- Choose all record you need to view
+<img width="2350" height="757" alt="image" src="https://github.com/user-attachments/assets/79f96129-a6f6-4cf9-bd08-bbb4fb753435" />
+- Choose table
+<img width="374" height="523" alt="image" src="https://github.com/user-attachments/assets/ea01b320-25e9-4641-9e8c-03f9aa638a82" />
+- Click submit
+<img width="2382" height="1475" alt="image" src="https://github.com/user-attachments/assets/77158693-bc2b-48dd-ba97-9e242e70bd2e" />
