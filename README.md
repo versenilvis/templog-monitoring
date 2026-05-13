@@ -96,7 +96,7 @@ make app
 
 *Đừng quên dùng `make down` để tắt DB khi dừng tất cả dịch vụ, vì khi kill web/server, container Docker InfluxDB vẫn đang chạy nền.*
 
-## Showcase mạch PCB tự ăn mòn (PCB Etching)
+## Showcase khắc mạch in PCB (PCB Etching)
 
 <div align="center">
   <table>
