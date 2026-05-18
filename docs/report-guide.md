@@ -4,3 +4,6 @@
 
 > [!WARNING]
 > Nếu như import file báo cáo vào prisma thì nó chỉ là ảnh thôi, không bấm được mục lục
+
+> [!NOTE]
+> Link Prisma hoặc google docs sau này có thể hết hạn nên tốt nhất tải file [report.pdf](docs/report.pdf) về rồi dùng bất kỳ pdf editor nào chỉnh sửa
