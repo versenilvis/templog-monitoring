@@ -2,7 +2,11 @@
   <img width=10% alt="ce" src="https://github.com/user-attachments/assets/b98ff0ac-1f45-4ff7-aa04-ab652528cbdd" />
   <h1>Templog-monitoring</h1>
   <p><b>Hệ thống giám sát nhiệt độ và độ ẩm phòng thời gian thực qua ESP32, MQTT, backend Go và frontend WebSocket</b></p>
-  <p><a href="#cài-đặt"><strong>Cài đặt »</strong></a></p>
+  <p>
+    <a href="#cài-đặt"><strong>Cài đặt »</strong></a>
+    &nbsp;&nbsp;&nbsp;
+    <a href="docs/report.pdf"><strong>Báo cáo »</strong></a>
+  </p>
   <img src="https://camo.githubusercontent.com/b16ecdcac9c3d21ec3a49459430f747b46b3a37acc95ee468d87d0ec61ff2392/68747470733a2f2f692e696d6775722e636f6d2f576d4d6e5352742e706e67">
 </div>
 
